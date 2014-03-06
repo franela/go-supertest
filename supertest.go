@@ -95,22 +95,6 @@ func (r *Request) Query(name, value string) *Request {
   return r
 }
 
-func objectsAreEqual(a, b interface{}) bool {
-  if reflect.DeepEqual(a, b) {
-    return true
-  }
-
-  if reflect.ValueOf(a) == reflect.ValueOf(b) {
-    return true
-  }
-
-  if fmt.Sprintf("%#v", a) == fmt.Sprintf("%#v", b) {
-    return true
-  }
-
-  return false
-}
-
 func (r *Request) Expect(args ...interface{}) error {
   if len(args) == 0 {
     panic("Expect cannot be called without arguments")
@@ -162,17 +146,28 @@ func (r *Request) Expect(args ...interface{}) error {
     // Read the entire response body
     b, _ := ioutil.ReadAll(res.Body)
 
-    // Try to parse to JSON
-    var v interface{}
-    e := json.Unmarshal(b, &v)
-    if e != nil {
-      // It is not a json, so treat as string
-      v = string(b)
+    if s, ok := bodyToCompare.(string); ok {
+      // It is a string
+      str := string(b)
+
+      if s != str {
+        err = fmt.Errorf(fmt.Sprintf("%#v", s) + " does not equal " + fmt.Sprintf("%#v", str))
+      }
+    } else {
+      // Try to parse to JSON
+      ptrNewValue := reflect.New(reflect.TypeOf(bodyToCompare))
+      newValue := reflect.Indirect(ptrNewValue)
+
+      e := json.Unmarshal(b, ptrNewValue.Interface())
+      if e != nil {
+        err = fmt.Errorf("Expected: %#v, but got %#v. %s", bodyToCompare, string(b), e)
+      } else {
+        if !objectsAreEqual(bodyToCompare, newValue.Interface()) {
+          err = fmt.Errorf(fmt.Sprintf("%#v", bodyToCompare) + " does not equal " + fmt.Sprintf("%#v", newValue.Interface()))
+        }
+      }
     }
 
-    if !objectsAreEqual(bodyToCompare, v) {
-      err = fmt.Errorf(fmt.Sprintf("%#v", bodyToCompare) + " does not equal " + fmt.Sprintf("%#v", v))
-    }
   }
 
   if r.done != nil {
@@ -183,6 +178,22 @@ func (r *Request) Expect(args ...interface{}) error {
     }
   }
   return err
+}
+
+func objectsAreEqual(a, b interface{}) bool {
+  if reflect.DeepEqual(a, b) {
+    return true
+  }
+
+  if reflect.ValueOf(a) == reflect.ValueOf(b) {
+    return true
+  }
+
+  if fmt.Sprintf("%#v", a) == fmt.Sprintf("%#v", b) {
+    return true
+  }
+
+  return false
 }
 
 func prepareRequestBody(b interface{}) (io.Reader, error) {

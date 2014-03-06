@@ -128,7 +128,7 @@ func TestSuperTest(t *testing.T) {
 
     g.Describe(".Expect(status, body)", func() {
       g.It("should assert the response body as json", func(done Done) {
-        payload := map[string]interface{} { "a": "b" }
+        payload := map[string]string { "a": "b" }
 
         ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
           b, _ := json.Marshal(payload)
@@ -140,6 +140,47 @@ func TestSuperTest(t *testing.T) {
         NewRequest(ts.URL).
           Get("/").
           Expect(200, payload, done)
+      })
+
+      g.It("should assert the response body as json using structs", func(done Done) {
+        type Test struct {
+          Foo string
+          Bar string
+        }
+
+        payload := Test{ Foo: "foo", Bar: "bar" }
+
+        ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+          b, _ := json.Marshal(payload)
+          w.WriteHeader(200)
+          w.Write(b)
+        }))
+        defer ts.Close()
+
+        NewRequest(ts.URL).
+          Get("/").
+          Expect(200, payload, done)
+      })
+
+      g.It("should fail when body is different", func() {
+        type Test struct {
+          Foo string
+          Bar string
+        }
+
+        payload := Test{ Foo: "foo", Bar: "bar" }
+
+        ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+          w.WriteHeader(200)
+          w.Write(bytes.NewBufferString("[]").Bytes())
+        }))
+        defer ts.Close()
+
+        err := NewRequest(ts.URL).
+          Get("/").
+          Expect(200, payload)
+
+        g.Assert(err != nil).IsTrue()
       })
 
       g.It("should assert the response body as string", func(done Done) {
