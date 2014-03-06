@@ -23,12 +23,7 @@ func MyTest(t *testing.T) {
 
   g.Describe("GET /", function() {
     g.It("Should respond 200", function(done Done) {
-      ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(200)
-      }))
-      defer ts.Close()
-
-      NewRequest(ts.URL).
+      NewRequest("http://example.com").
         Get("/").
         Expect(200, done)
     })
