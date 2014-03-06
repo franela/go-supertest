@@ -2,7 +2,6 @@ package supertest
 
 import(
   . "github.com/franela/goblin"
-  . "github.com/onsi/gomega"
   "testing"
   "net/http/httptest"
   "net/http"
@@ -13,8 +12,6 @@ import(
 
 func TestSuperTest(t *testing.T) {
   g := Goblin(t)
-
-  RegisterFailHandler(func(m string, _ ...int) { g.Fail(m) })
 
   g.Describe("Supertest", func() {
     g.Describe("Request(url)", func() {
