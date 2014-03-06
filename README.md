@@ -4,7 +4,7 @@
 
 ## Why?
 
-  Because we want to keep testing HTTP testing in Go plain simple.
+  Because we want to keep HTTP testing in Go plain simple.
   
 
 ## Example
