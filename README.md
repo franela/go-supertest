@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/franela/go-supertest.png?branch=master)](https://travis-ci.org/franela/go-supertest)
 # go-supertest
 
   HTTP assertions made easy for Go via [goreq](https://github.com/franela/goreq)
