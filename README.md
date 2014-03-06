@@ -1,6 +1,8 @@
-# Go-supertest
+# go-supertest
 
-  [Goblin](https://github.com/franela/goblin) HTTP assertions made easy for Go 
+  HTTP assertions made easy for Go via [goreq](https://github.com/franela/goreq)
+
+  We love [nodejs supertest](https://github.com/visionmedia/supertest) module and we wanted something like that for Go.
 
 ## Why?
 
@@ -18,32 +20,32 @@ import (
 
 func MyTest(t *testing.T) {
   g := Goblin(t)
-  
+
   g.Describe("GET /", function() {
     g.It("Should respond 200", function(done Done) {
       ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(200)
       }))
-      
-      NewRequest(ts.URL).Get("/").Expect(200, done)
+      defer ts.Close()
+
+      NewRequest(ts.URL).
+        Get("/").
+        Expect(200, done)
     })
   })
 }
-
 ```
 
 ## API
 
 
-### .expect(status[, Done])
+### .expect(status[, func])
 
   Assert response `status` code.
 
-### .expect(status, payload[, Done])
+### .expect(status, body[, fn])
 
-  Assert response `status` code and `payload`.
-
-
+  Assert response `status` code and `body`.
 
 ## Notes
 
