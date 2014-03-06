@@ -25,7 +25,8 @@ func TestSuperTest(t *testing.T) {
         }))
         defer ts.Close()
 
-        NewRequest(ts.URL).Get("/").Expect(200)
+        NewRequest(ts.URL).
+          Get("/").Expect(200)
       })
 
       g.Describe(".Send(interface{})", func() {
@@ -46,7 +47,10 @@ func TestSuperTest(t *testing.T) {
           }))
           defer ts.Close()
 
-          NewRequest(ts.URL).Post("/").Send(payload).Expect(200)
+          NewRequest(ts.URL).
+            Post("/").
+            Send(payload).
+            Expect(200)
         })
       })
 
@@ -65,7 +69,10 @@ func TestSuperTest(t *testing.T) {
           }))
           defer ts.Close()
 
-          NewRequest(ts.URL).Post("/").Send(payload).Expect(200)
+          NewRequest(ts.URL).
+            Post("/").
+            Send(payload).
+            Expect(200)
         })
       })
 
@@ -78,7 +85,11 @@ func TestSuperTest(t *testing.T) {
           }))
           defer ts.Close()
 
-          NewRequest(ts.URL).Get("/").Set("foo", "bar").Set("a", "b").Expect(200)
+          NewRequest(ts.URL).
+            Get("/").
+            Set("foo", "bar").
+            Set("a", "b").
+            Expect(200)
         })
       })
 
@@ -93,7 +104,11 @@ func TestSuperTest(t *testing.T) {
           }))
           defer ts.Close()
 
-          NewRequest(ts.URL).Get("/").Query("foo", "bar").Query("a", "b").Expect(200)
+          NewRequest(ts.URL).
+            Get("/").
+            Query("foo", "bar").
+            Query("a", "b").
+            Expect(200)
         })
       })
     })
@@ -105,7 +120,9 @@ func TestSuperTest(t *testing.T) {
         }))
         defer ts.Close()
 
-        NewRequest(ts.URL).Get("/").Expect(204, done)
+        NewRequest(ts.URL).
+          Get("/").
+          Expect(204, done)
       })
     })
 
@@ -120,7 +137,9 @@ func TestSuperTest(t *testing.T) {
         }))
         defer ts.Close()
 
-        NewRequest(ts.URL).Get("/").Expect(200, payload, done)
+        NewRequest(ts.URL).
+          Get("/").
+          Expect(200, payload, done)
       })
 
       g.It("should assert the response body as string", func(done Done) {
@@ -130,7 +149,9 @@ func TestSuperTest(t *testing.T) {
         }))
         defer ts.Close()
 
-        NewRequest(ts.URL).Get("/").Expect(200, "foo", done)
+        NewRequest(ts.URL).
+          Get("/").
+          Expect(200, "foo", done)
       })
     })
   })
