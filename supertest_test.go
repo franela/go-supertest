@@ -18,15 +18,14 @@ func TestSuperTest(t *testing.T) {
 
   g.Describe("Supertest", func() {
     g.Describe("Request(url)", func() {
-      g.It("should be supported", func() {
+      g.It("should be supported", func(done Done) {
         ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
           w.WriteHeader(201)
+          done()
         }))
         defer ts.Close()
 
-        err := NewRequest(ts.URL).Get("/").Expect(200)
-
-        g.Assert(err != nil).IsTrue()
+        NewRequest(ts.URL).Get("/").Expect(200)
       })
 
       g.Describe(".Send(interface{})", func() {
@@ -100,22 +99,18 @@ func TestSuperTest(t *testing.T) {
     })
 
     g.Describe(".Expect(status)", func() {
-      g.It("should be supported", func() {
+      g.It("should be supported", func(done Done) {
         ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
           w.WriteHeader(204)
         }))
         defer ts.Close()
 
-        err := NewRequest(ts.URL).Get("/").Expect(204)
-
-        if err != nil {
-          g.Fail(err)
-        }
+        NewRequest(ts.URL).Get("/").Expect(204, done)
       })
     })
 
     g.Describe(".Expect(status, body)", func() {
-      g.It("should assert the response body as json", func() {
+      g.It("should assert the response body as json", func(done Done) {
         payload := map[string]interface{} { "a": "b" }
 
         ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -125,25 +120,17 @@ func TestSuperTest(t *testing.T) {
         }))
         defer ts.Close()
 
-        err := NewRequest(ts.URL).Get("/").Expect(200, payload)
-
-        if err != nil {
-          g.Fail(err)
-        }
+        NewRequest(ts.URL).Get("/").Expect(200, payload, done)
       })
 
-      g.It("should assert the response body as string", func() {
+      g.It("should assert the response body as string", func(done Done) {
         ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
           w.WriteHeader(200)
           w.Write(bytes.NewBufferString("foo").Bytes())
         }))
         defer ts.Close()
 
-        err := NewRequest(ts.URL).Get("/").Expect(200, "foo")
-
-        if err != nil {
-          g.Fail(err)
-        }
+        NewRequest(ts.URL).Get("/").Expect(200, "foo", done)
       })
     })
   })

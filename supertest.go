@@ -2,6 +2,7 @@ package supertest
 
 import(
   "github.com/franela/goreq"
+  "github.com/franela/goblin"
   "fmt"
   "io"
   "strings"
@@ -16,7 +17,7 @@ type Request struct {
   base string
   method string
   path string
-  done func(interface{})
+  done goblin.Done
   body interface{}
   headers []headerTuple
   query url.Values
@@ -119,7 +120,7 @@ func (r *Request) Expect(args ...interface{}) error {
   var bodyToCompare interface{}
 
   if len(args) == 2 {
-    d, ok := args[1].(func(interface{}))
+    d, ok := args[1].(goblin.Done)
     r.done = d
 
     if !ok {
@@ -129,7 +130,7 @@ func (r *Request) Expect(args ...interface{}) error {
 
   if len(args) == 3 {
     bodyToCompare = args[1]
-    d, _ := args[2].(func(interface{}))
+    d, _ := args[2].(goblin.Done)
 
     r.done = d
   }
@@ -175,7 +176,11 @@ func (r *Request) Expect(args ...interface{}) error {
   }
 
   if r.done != nil {
-    r.done(err)
+    if err != nil {
+      r.done(err)
+    } else {
+      r.done()
+    }
   }
   return err
 }
