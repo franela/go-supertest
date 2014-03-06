@@ -1,6 +1,6 @@
 # Go-supertest
 
-  [Goblin](https://github.com/franela/goblin) HTTP assertions made easy via for Go 
+  [Goblin](https://github.com/franela/goblin) HTTP assertions made easy for Go 
 
 ## Why?
 
