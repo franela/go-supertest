@@ -2,7 +2,6 @@ package supertest
 
 import(
   "github.com/franela/goreq"
-  "github.com/franela/goblin"
   "fmt"
   "io"
   "strings"
@@ -17,7 +16,7 @@ type Request struct {
   base string
   method string
   path string
-  done goblin.Done
+  done reflect.Value
   body interface{}
   headers []headerTuple
   query url.Values
@@ -104,19 +103,16 @@ func (r *Request) Expect(args ...interface{}) error {
   var bodyToCompare interface{}
 
   if len(args) == 2 {
-    d, ok := args[1].(goblin.Done)
-    r.done = d
-
-    if !ok {
+    if reflect.ValueOf(args[1]).Kind().String() == "func" {
+      r.done = reflect.ValueOf(args[1])
+    } else {
       bodyToCompare = args[1]
     }
   }
 
   if len(args) == 3 {
     bodyToCompare = args[1]
-    d, _ := args[2].(goblin.Done)
-
-    r.done = d
+    r.done = reflect.ValueOf(args[2])
   }
 
   var err error
@@ -170,11 +166,11 @@ func (r *Request) Expect(args ...interface{}) error {
 
   }
 
-  if r.done != nil {
+  if r.done.IsValid() {
     if err != nil {
-      r.done(err)
+      r.done.Call([]reflect.Value {reflect.ValueOf(err)})
     } else {
-      r.done()
+      r.done.Call([]reflect.Value {})
     }
   }
   return err
