@@ -103,7 +103,7 @@ func (r *Request) Expect(args ...interface{}) error {
   var bodyToCompare interface{}
 
   if len(args) == 2 {
-    if reflect.ValueOf(args[1]).Kind().String() == "func" {
+    if reflect.ValueOf(args[1]).Kind() == reflect.Func {
       r.done = reflect.ValueOf(args[1])
     } else {
       bodyToCompare = args[1]
