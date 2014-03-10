@@ -134,36 +134,35 @@ func (r *Request) Expect(args ...interface{}) error {
 
   if e != nil {
     err = e
-  }
+  } else {
+    if res.StatusCode != status {
+      err = fmt.Errorf("Expected %d, was %d", status, res.StatusCode)
+    } else if bodyToCompare != nil {
+      // Read the entire response body
+      b, _ := ioutil.ReadAll(res.Body)
 
-  if res.StatusCode != status {
-    err = fmt.Errorf("Expected %d, was %d", status, res.StatusCode)
-  } else if bodyToCompare != nil {
-    // Read the entire response body
-    b, _ := ioutil.ReadAll(res.Body)
+      if s, ok := bodyToCompare.(string); ok {
+        // It is a string
+        str := string(b)
 
-    if s, ok := bodyToCompare.(string); ok {
-      // It is a string
-      str := string(b)
-
-      if s != str {
-        err = fmt.Errorf(fmt.Sprintf("%#v", s) + " does not equal " + fmt.Sprintf("%#v", str))
-      }
-    } else {
-      // Try to parse to JSON
-      ptrNewValue := reflect.New(reflect.TypeOf(bodyToCompare))
-      newValue := reflect.Indirect(ptrNewValue)
-
-      e := json.Unmarshal(b, ptrNewValue.Interface())
-      if e != nil {
-        err = fmt.Errorf("Expected: %#v, but got %#v. %s", bodyToCompare, string(b), e)
+        if s != str {
+          err = fmt.Errorf(fmt.Sprintf("%#v", s) + " does not equal " + fmt.Sprintf("%#v", str))
+        }
       } else {
-        if !objectsAreEqual(bodyToCompare, newValue.Interface()) {
-          err = fmt.Errorf(fmt.Sprintf("%#v", bodyToCompare) + " does not equal " + fmt.Sprintf("%#v", newValue.Interface()))
+        // Try to parse to JSON
+        ptrNewValue := reflect.New(reflect.TypeOf(bodyToCompare))
+        newValue := reflect.Indirect(ptrNewValue)
+
+        e := json.Unmarshal(b, ptrNewValue.Interface())
+        if e != nil {
+          err = fmt.Errorf("Expected: %#v, but got %#v. %s", bodyToCompare, string(b), e)
+        } else {
+          if !objectsAreEqual(bodyToCompare, newValue.Interface()) {
+            err = fmt.Errorf(fmt.Sprintf("%#v", bodyToCompare) + " does not equal " + fmt.Sprintf("%#v", newValue.Interface()))
+          }
         }
       }
     }
-
   }
 
   if r.done.IsValid() {

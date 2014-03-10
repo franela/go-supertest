@@ -26,6 +26,13 @@ func TestSuperTest(t *testing.T) {
           Get("/").Expect(200)
       })
 
+      g.It("should not panic when there is a connection error", func(done Done) {
+        err := NewRequest("http://127.0.0.0:1111").
+          Get("/").Expect(200)
+        g.Assert(err != nil).IsTrue()
+        done()
+      })
+
       g.Describe(".Send(interface{})", func() {
         g.It("should be supported", func(done Done) {
           var o map[string]string
